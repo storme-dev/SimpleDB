@@ -7,7 +7,7 @@
 3. Подключаем модуль require('./db')
 
 ## Пример кода
-<code>
+```js
     const { SimpleDB } = require('./db')
     
     const db = new SimpleDB('dbname') // создаёт БД если её нет.Если есть, то загружает её
@@ -25,4 +25,4 @@
     db.update('users', { name: 'AlexChanged' }, user => {
         if(user.name == 'Alex') return true
     }) // здесь мы изменяем значение name на AlexChanged для всех записей, у которых поле name равно Alex
-</code>
+```
