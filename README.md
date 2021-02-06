@@ -70,3 +70,19 @@ db.update('users', { name: 'AlexChanged' }, user => {
     if(user.name == 'Alex') return true
 })
 ```
+
+### Удаление записи из таблицы
+На примере ниже мы удаляем все записи таблицы, у которых поле name = Alex
+
+```js
+db.delete('users', user => {
+    if(user.name == 'Alex') return true
+})
+```
+
+### Удаление таблицы
+На примере ниже мы удаляем всю таблицу.Все данные из этой таблицы тоже удалятся
+
+```js
+db.dropTable('users')
+```
