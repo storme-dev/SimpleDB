@@ -152,7 +152,6 @@ class SimpleDB {
         this.data[tableidx] = []
         this.tableIndexes[tablename] = -1
         fs.unlink(path.join(this.path, tablename+'.json'))
-        fs.unlink(path.join(this.path, tablename+'_struct.kjson'))
     }
 
     delete(tablename, func) {
