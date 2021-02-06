@@ -89,7 +89,7 @@ class SimpleDB {
                             }
                         }
                     }
-                    this.writeTable(tablename)
+                    setTimeout(() => this.writeTable(tablename), 1000)
                 }
                 else
                 {
@@ -123,6 +123,23 @@ class SimpleDB {
         let tableidx = this.tableIndexes[tablename]
         return this.data[tableidx][idx]
     }
+    
+    setTableStruct(tablename, object)
+    {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        this.tables[tableidx] = {
+            name: tablename,
+            struct: object
+        }
+
+        fs.unlink(path.join(this.path, `${tablename}_struct.kjson`), () => {
+            fs.writeFile(path.join(this.path, `${tablename}_struct.kjson`), JSON.stringify(this.tables[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
+        })
+
+        return true
+    }
 
     /*
     createTable(tablename, object) {
@@ -152,6 +169,7 @@ class SimpleDB {
         this.data[tableidx] = []
         this.tableIndexes[tablename] = -1
         fs.unlink(path.join(this.path, tablename+'.json'))
+        fs.unlink(path.join(this.path, tablename+'_struct.kjson'))
     }
 
     delete(tablename, func) {
@@ -238,6 +256,29 @@ class SimpleDB {
 
         for(let instance of this.data[tableidx]) {
             if(func(instance) === true) result.push(instance)
+        }
+
+        return result
+    }
+
+    selectAll(tablename, fields) {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        let result = []
+
+        for(let instance of this.data[tableidx]) {
+            let newInstance = {}
+
+            for(let key in instance)
+            {
+                if(fields.indexOf(key) != -1)
+                {
+                    newInstance[key] = instance[key]
+                }
+            }
+
+            result.push(newInstance)
         }
 
         return result
