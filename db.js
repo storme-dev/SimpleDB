@@ -1,4 +1,3 @@
-const { throws } = require('assert')
 const fs = require('fs')
 const path = require('path')
 const dbPath = path.join(__dirname, '/karpdb')
