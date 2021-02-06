@@ -142,6 +142,7 @@ class SimpleDB {
         return true
     }
 
+    /*
     createTable(tablename, object) {
         for(let table of this.tables)
         {
@@ -160,7 +161,7 @@ class SimpleDB {
         this.data[tableidx-1] = []
         this.tableIndexes[tablename] = tableidx-1
         return tableidx-1
-    }
+    }*/
 
     dropTable(tablename) {
         let tableidx = this.tableIndexes[tablename]
