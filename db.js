@@ -8,13 +8,13 @@ if (!fs.existsSync(dbPath)) {
 }
 
 class SimpleDB {
-    constructor(name) {
+    constructor(name, struct) {
         this.name = name
         this.path = path.join(dbPath, name)
         this.tables = [];
         this.data = [];
         this.tableIndexes = {};
-
+        /*
         if(fs.existsSync(path.join(dbPath, name)))
         {
             const tables = fs.readdirSync(this.path)
@@ -36,15 +36,88 @@ class SimpleDB {
         {
             fs.mkdirSync(this.path)
         }
+        */
+
+       if(fs.existsSync(path.join(dbPath, name)))
+       {
+            for(let tablename in struct)
+            {
+                let idx = this.tables.push({
+                    name: tablename,
+                    struct: struct[tablename]
+                })
+
+                idx--
+                this.tableIndexes[tablename] = idx
+                if(fs.existsSync(path.join(this.path, `${tablename}.json`)))
+                {
+                    this.data[idx] = JSON.parse(fs.readFileSync(path.join(this.path, `${tablename}.json`)))
+
+                    for(let i = 0; i < this.data[idx].length; i++)
+                    {
+                        const row = this.data[idx][i]
+                        for(let key in row)
+                        {
+                            let foundInStruct = false
+                            for(let k in struct[tablename]) { 
+                                if(key == k) { 
+                                    foundInStruct = true
+                                    break
+                                }
+                            }
+
+                            if(!foundInStruct)
+                            {
+                                delete this.data[idx][i][key]
+                            }
+                        }
+
+                        for(let key in struct[tablename])
+                        {
+                            let foundInData = false
+                            for(let k in row)
+                            {
+                                if(k == key) 
+                                {
+                                    foundInData = true
+                                    break
+                                }
+                            }
+
+                            if(!foundInData)
+                            {
+                                this.data[idx][i][key] = struct[tablename][key]
+                            }
+                        }
+                    }
+                    this.writeTable(tablename)
+                }
+                else
+                {
+                    this.data[idx] = []
+                }
+            }
+       }
+       else
+       {
+           fs.mkdirSync(this.path)
+       }
     }
 
     writeTable(tablename) {
         let tableidx = this.tableIndexes[tablename]
         if(tableidx == undefined) return 0
 
-        fs.unlink(path.join(this.path, tablename+'.json'), () => {
+        if(fs.existsSync(path.join(this.path, tablename+'.json')))
+        {
+            fs.unlink(path.join(this.path, tablename+'.json'), () => {
+                fs.writeFile(path.join(this.path, tablename+'.json'), JSON.stringify(this.data[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
+            })
+        }
+        else
+        {
             fs.writeFile(path.join(this.path, tablename+'.json'), JSON.stringify(this.data[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
-        })
+        }
     }
 
     getRow(tablename, idx) {
@@ -161,6 +234,15 @@ class SimpleDB {
         }
 
         let rowidx = this.data[tableidx].push(objectToPush)
+
+        for(let key in this.tables[tableidx].struct)
+        {
+            if(this.tables[tableidx].struct[key] == 'AUTO_INCREMENT')
+            {
+                this.data[tableidx][rowidx-1][key] = rowidx
+            }
+        }
+
         this.writeTable(tablename)
         return rowidx
     }
