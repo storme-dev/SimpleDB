@@ -103,14 +103,22 @@ class SimpleDB {
         let tableidx = this.tableIndexes[tablename]
         if(tableidx == undefined) return 0
 
-        let idxToSplice = []
+        let objectsToDelete = []
+        let JSONArray = []
 
         for(let i = 0; i < this.data[tableidx].length; i++) {
             const instance = this.data[tableidx][i]
-            if(func(instance) === true) idxToSplice.push(i)
+            if(func(instance) === true) 
+            {
+                JSONArray[i] = JSON.stringify(this.data[tableidx][i])
+                objectsToDelete.push(JSONArray[i])
+            }
         }
 
-        idxToSplice.forEach(item => this.data[tableidx].splice(item, 1))
+        objectsToDelete.forEach(item => {
+            this.data[tableidx].splice(JSONArray.indexOf(item), 1)
+        })
+
         this.writeTable(tablename)
         return true
     }
