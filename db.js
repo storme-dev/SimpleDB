@@ -1,3 +1,4 @@
+const { throws } = require('assert')
 const fs = require('fs')
 const path = require('path')
 const dbPath = path.join(__dirname, '/karpdb')
@@ -37,6 +38,15 @@ class SimpleDB {
         }
     }
 
+    writeTable(tablename) {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        fs.unlink(path.join(this.path, tablename+'.json'), () => {
+            fs.writeFile(path.join(this.path, tablename+'.json'), JSON.stringify(this.data[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
+        })
+    }
+
     getRow(tablename, idx) {
         let tableidx = this.tableIndexes[tablename]
         return this.data[tableidx][idx]
@@ -47,6 +57,7 @@ class SimpleDB {
         {
             if(table.name == tablename) return 0
         }
+
         let tableidx = this.tables.push({
             name: tablename,
             struct: object
@@ -61,6 +72,32 @@ class SimpleDB {
         return tableidx-1
     }
 
+    dropTable(tablename) {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        this.data[tableidx] = []
+        this.tableIndexes[tablename] = -1
+        fs.unlink(path.join(this.path, tablename+'.json'))
+        fs.unlink(path.join(this.path, tablename+'_struct.kjson'))
+    }
+
+    delete(tablename, func) {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        let idxToSplice = []
+
+        for(let i = 0; i < this.data[tableidx].length; i++) {
+            const instance = this.data[tableidx][i]
+            if(func(instance) === true) idxToSplice.push(i)
+        }
+
+        idxToSplice.forEach(item => this.data[tableidx].splice(item, 1))
+        this.writeTable(tablename)
+        return true
+    }
+
     insert(tablename, object) {
         let tableidx = this.tableIndexes[tablename]
 
@@ -73,7 +110,6 @@ class SimpleDB {
             let validKey = false
             for(let key in this.tables[tableidx].struct)
             {
-                let value = this.tables[tableidx].struct[key]
                 if(key == givenKey)
                 {
                     validKey = true
@@ -100,9 +136,7 @@ class SimpleDB {
         }
 
         let rowidx = this.data[tableidx].push(objectToPush)
-        fs.unlink(path.join(this.path, tablename+'.json'), () => {
-            fs.writeFile(path.join(this.path, tablename+'.json'), JSON.stringify(this.data[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
-        })
+        this.writeTable(tablename)
         return rowidx
     }
 
@@ -162,9 +196,7 @@ class SimpleDB {
             }
         }
 
-        fs.unlink(path.join(this.path, tablename+'.json'), () => {
-            fs.writeFile(path.join(this.path, tablename+'.json'), JSON.stringify(this.data[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
-        })
+        this.writeTable(tablename)
         return true       
     }
 }
