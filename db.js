@@ -52,6 +52,23 @@ class SimpleDB {
         return this.data[tableidx][idx]
     }
 
+    setTableStruct(tablename, object)
+    {
+        let tableidx = this.tableIndexes[tablename]
+        if(tableidx == undefined) return 0
+
+        this.tables[tableidx] = {
+            name: tablename,
+            struct: object
+        }
+
+        fs.unlink(path.join(this.path, `${tablename}_struct.kjson`), () => {
+            fs.writeFile(path.join(this.path, `${tablename}_struct.kjson`), JSON.stringify(this.tables[tableidx]), {encoding:'utf8',flag:'w'}, () => {})
+        })
+
+        return true
+    }
+
     createTable(tablename, object) {
         for(let table of this.tables)
         {
