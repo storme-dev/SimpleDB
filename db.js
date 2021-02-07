@@ -13,32 +13,9 @@ class SimpleDB {
         this.tables = [];
         this.data = [];
         this.tableIndexes = {};
-        /*
+
         if(fs.existsSync(path.join(dbPath, name)))
         {
-            const tables = fs.readdirSync(this.path)
-
-            for(let table of tables) {
-                if(path.extname(table) == '.json') {
-                    const tableName = path.basename(table, '.json')
-
-                    let tableObject = JSON.parse(fs.readFileSync(path.join(this.path, `${tableName}_struct.kjson`)))
-
-                    let idx = this.tables.push(tableObject)
-                    idx --
-                    this.tableIndexes[tableName] = idx
-                    this.data[idx] = JSON.parse(fs.readFileSync(path.join(this.path, table)))
-                }
-            }
-        }
-        else
-        {
-            fs.mkdirSync(this.path)
-        }
-        */
-
-       if(fs.existsSync(path.join(dbPath, name)))
-       {
             for(let tablename in struct)
             {
                 let idx = this.tables.push({
@@ -96,11 +73,11 @@ class SimpleDB {
                     this.data[idx] = []
                 }
             }
-       }
-       else
-       {
+        }
+        else
+        {
            fs.mkdirSync(this.path)
-       }
+        }
     }
 
     writeTable(tablename) {
@@ -140,27 +117,6 @@ class SimpleDB {
 
         return true
     }
-
-    /*
-    createTable(tablename, object) {
-        for(let table of this.tables)
-        {
-            if(table.name == tablename) return 0
-        }
-
-        let tableidx = this.tables.push({
-            name: tablename,
-            struct: object
-        })
-
-        fs.unlink(path.join(this.path, `${tablename}_struct.kjson`), () => {
-            fs.writeFile(path.join(this.path, `${tablename}_struct.kjson`), JSON.stringify(this.tables[tableidx-1]), {encoding:'utf8',flag:'w'}, () => {})
-        })
-
-        this.data[tableidx-1] = []
-        this.tableIndexes[tablename] = tableidx-1
-        return tableidx-1
-    }*/
 
     dropTable(tablename) {
         let tableidx = this.tableIndexes[tablename]
