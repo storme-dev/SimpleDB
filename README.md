@@ -57,9 +57,7 @@ let array = db.select('users', ['id', 'name'], user => {
 
 Если хотите, чтобы отбирались все поля, используйте:
 ```js
-let array = db.find('users', user => {
-    if(user.name == 'Alex') return true
-})
+let array = db.findAll('users)
 ```
 
 ### Изменение записей таблицы
